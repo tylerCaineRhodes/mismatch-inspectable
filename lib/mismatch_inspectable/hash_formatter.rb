@@ -11,7 +11,7 @@ module MismatchInspectable
     end
 
     def merge_mismatches(nested_mismatches)
-      nested_mismatches.each { |k, v| mismatches[k].merge!(v) }
+      nested_mismatches.each { |k, v| mismatches[k] = v }
     end
   end
 end

@@ -1,5 +1,6 @@
 require_relative 'hash_formatter'
 require_relative 'array_formatter'
+require_relative 'object_formatter'
 
 module MismatchInspectable
   class << self
@@ -21,9 +22,14 @@ module MismatchInspectable
   def inspect_mismatch(other, recursive: false, include_class: true, prefix: '', format: :array)
     return if self.class != other.class
 
-    formatter = format == :hash ? HashFormatter.new : ArrayFormatter.new
-    process_attributes(formatter, other, recursive, include_class, prefix, format)
+    formatter = case format
+                when :hash then HashFormatter.new
+                when :array then ArrayFormatter.new
+                when :object then ObjectFormatter.new
+                else raise ArgumentError, "Invalid format: #{format}"
+                end
 
+    process_attributes(formatter, other, recursive, include_class, prefix, format)
     formatter.mismatches
   end
 
@@ -52,14 +58,22 @@ module MismatchInspectable
   end
 
   def process_recursive(formatter, curr_val, other_val, include_class, prefix, attribute, format)
-    prefix = update_prefix(include_class, prefix)
     nested_mismatches = curr_val.inspect_mismatch(
-      other_val, recursive: true, include_class: include_class, prefix: prefix + "#{attribute}.", format: format
+      other_val,
+      recursive: true,
+      include_class: include_class,
+      prefix: prefix + "#{attribute}.",
+      format: format
     )
-    formatter.merge_mismatches(nested_mismatches)
+
+    formatter.merge_mismatches(nested_mismatches) unless nested_mismatches?(nested_mismatches)
   end
 
   def update_prefix(include_class, prefix)
     include_class ? "#{prefix}#{self.class}#" : prefix
+  end
+
+  def nested_mismatches?(mismatches)
+    mismatches.nil? || mismatches.empty?
   end
 end
