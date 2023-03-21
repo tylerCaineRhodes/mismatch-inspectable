@@ -1,6 +1,6 @@
 require 'rspec'
 require 'spec_helper'
-require 'mismatch_inspectable/mismatch_inspectable'
+require 'mismatch_inspectable'
 
 class TestClass
   include MismatchInspectable
