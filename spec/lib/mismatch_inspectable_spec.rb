@@ -306,6 +306,104 @@ RSpec.describe MismatchInspectable do
               end
             end
           end
+
+          context 'with multiple levels of nested inspectable attributes' do
+            class Thing
+              include MismatchInspectable
+
+              inspect_mismatch_for :color, :shape, :is_cool, :nested_thing
+
+              def initialize(color: nil, shape: nil, is_cool: nil, nested_thing: nil)
+                @color = color
+                @shape = shape
+                @is_cool = is_cool
+                @nested_thing = nested_thing
+              end
+
+              def inspect
+                '<Thing>'
+              end
+
+              attr_accessor :color, :shape, :is_cool, :nested_thing
+            end
+
+            let(:thing1) do
+              Thing.new(
+                color: 'blue',
+                shape: 'square',
+                is_cool: false,
+                nested_thing: Thing.new(
+                  color: 'blue',
+                  shape: 'oval',
+                  is_cool: true,
+                  nested_thing: Thing.new(
+                    color: 'silver',
+                    shape: 'oval',
+                    is_cool: true
+                  )
+                )
+              )
+            end
+
+            let(:thing2) do
+              Thing.new(
+                color: 'green',
+                shape: 'oval',
+                is_cool: false,
+                nested_thing: Thing.new(
+                  color: 'red',
+                  shape: 'another shape',
+                  is_cool: true,
+                  nested_thing: Thing.new(
+                    color: 'blue',
+                    shape: 'oval',
+                    is_cool: false
+                  )
+                )
+              )
+            end
+            context 'with recursive flag disabled' do
+              it 'returns the mismatched top-level attributes' do
+                expect(thing1.inspect_mismatch(thing2, format: :object)).to eq(
+                  {
+                    Thing: {
+                      color: %w[blue green],
+                      shape: %w[square oval],
+                      nested_thing: [thing1.nested_thing, thing2.nested_thing] # [<Thing>, <Thing>]
+                    }
+                  }
+                )
+              end
+            end
+
+            context 'with recursive flag enabled' do
+              let(:recursive) { true }
+              it 'returns the mismatched attributes with the appropriate nesting' do
+                expect(thing1.inspect_mismatch(thing2, recursive: recursive, format: :object)).to eq(
+                  {
+                    Thing: {
+                      color: %w[blue green],
+                      shape: %w[
+                        square oval
+                      ],
+                      nested_thing: {
+                        Thing: {
+                          color: %w[blue red],
+                          shape: ['oval', 'another shape'],
+                          nested_thing: {
+                            Thing: {
+                              color: %w[silver blue],
+                              is_cool: [true, false]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                )
+              end
+            end
+          end
         end
       end
     end

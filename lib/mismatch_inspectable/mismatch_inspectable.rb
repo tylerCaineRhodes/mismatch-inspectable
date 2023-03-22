@@ -19,15 +19,16 @@ module MismatchInspectable
     end
   end
 
+  class MissingCompareMethodsError < StandardError
+    def initialize(klass)
+      super("The class #{klass} does not have methods to compare. Define methods with `inspect_mismatch_for`.")
+    end
+  end
+
   def inspect_mismatch(other, recursive: false, include_class: true, prefix: '', format: :array)
     return if self.class != other.class
 
-    formatter = case format
-                when :hash then HashFormatter.new
-                when :array then ArrayFormatter.new
-                when :object then ObjectFormatter.new
-                else raise ArgumentError, "Invalid format: #{format}"
-                end
+    formatter = select_formatter(format)
 
     process_attributes(formatter, other, recursive, include_class, prefix, format)
     formatter.mismatches
@@ -39,8 +40,19 @@ module MismatchInspectable
 
   private
 
+  def select_formatter(format)
+    case format
+    when :hash then HashFormatter.new
+    when :array then ArrayFormatter.new
+    when :object then ObjectFormatter.new
+    else raise ArgumentError, "Invalid format: #{format}"
+    end
+  end
+
   def process_attributes(formatter, other, recursive, include_class, prefix, format)
-    self.class.compare_methods.each do |attribute|
+    raise MissingCompareMethodsError if compare_methods.nil?
+
+    compare_methods.each do |attribute|
       curr_val = __send__(attribute)
       other_val = other.__send__(attribute)
 
@@ -62,18 +74,24 @@ module MismatchInspectable
       other_val,
       recursive: true,
       include_class: include_class,
-      prefix: prefix + "#{attribute}.",
+      prefix: "#{prefix}#{attribute}.",
       format: format
     )
 
-    formatter.merge_mismatches(nested_mismatches) unless nested_mismatches?(nested_mismatches)
+    formatter.merge_mismatches(nested_mismatches) unless no_nested_mismatches?(nested_mismatches)
   end
 
   def update_prefix(include_class, prefix)
-    include_class ? "#{prefix}#{self.class}#" : prefix
+    comparable_prefix = get_comparable_prefix(prefix)
+    include_class && comparable_prefix != "#{self.class}#" ? "#{prefix}#{self.class}#" : prefix
   end
 
-  def nested_mismatches?(mismatches)
+  def no_nested_mismatches?(mismatches)
     mismatches.nil? || mismatches.empty?
+  end
+
+  def get_comparable_prefix(prefix)
+    prefixes = prefix.split('.')
+    prefixes.length >= 2 ? prefixes[-1] : prefix
   end
 end
