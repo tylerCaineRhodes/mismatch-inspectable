@@ -3,12 +3,8 @@ require_relative "array_formatter"
 require_relative "object_formatter"
 
 module MismatchInspectable
-  class << self
-    def included(base)
-      class << base
-        include ClassMethods
-      end
-    end
+  def self.included(target_class)
+    target_class.extend ClassMethods
   end
 
   module ClassMethods
