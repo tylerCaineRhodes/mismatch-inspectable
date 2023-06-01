@@ -1,6 +1,6 @@
-require_relative 'hash_formatter'
-require_relative 'array_formatter'
-require_relative 'object_formatter'
+require_relative "hash_formatter"
+require_relative "array_formatter"
+require_relative "object_formatter"
 
 module MismatchInspectable
   class << self
@@ -25,7 +25,7 @@ module MismatchInspectable
     end
   end
 
-  def inspect_mismatch(other, recursive: false, include_class: true, prefix: '', format: :array)
+  def inspect_mismatch(other, recursive: false, include_class: true, prefix: "", format: :array)
     return if self.class != other.class
 
     formatter = select_formatter(format)
@@ -49,6 +49,7 @@ module MismatchInspectable
     end
   end
 
+  # rubocop:disable Metrics/ParameterLists
   def process_attributes(formatter, other, recursive, include_class, prefix, format)
     raise MissingCompareMethodsError if compare_methods.nil?
 
@@ -73,13 +74,14 @@ module MismatchInspectable
     nested_mismatches = curr_val.inspect_mismatch(
       other_val,
       recursive: true,
-      include_class: include_class,
+      include_class:,
       prefix: "#{prefix}#{attribute}.",
-      format: format
+      format:
     )
 
     formatter.merge_mismatches(nested_mismatches) unless no_nested_mismatches?(nested_mismatches)
   end
+  # rubocop:enable Metrics/ParameterLists
 
   def update_prefix(include_class, prefix)
     comparable_prefix = get_comparable_prefix(prefix)
@@ -91,7 +93,7 @@ module MismatchInspectable
   end
 
   def get_comparable_prefix(prefix)
-    prefixes = prefix.split('.')
+    prefixes = prefix.split(".")
     prefixes.length >= 2 ? prefixes[-1] : prefix
   end
 end

@@ -1,0 +1,50 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2.1
+
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Naming/MethodParameterName:
+  Enabled: false
+
+Style/For:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/RaiseArgs:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/WhileUntilDo:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/ParallelAssignment:
+  Enabled: false
+
+Style/EachWithObject:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+  ConsistentQuotesInMultiline: false

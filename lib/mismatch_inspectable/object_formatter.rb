@@ -1,4 +1,4 @@
-require_relative 'deep_merge'
+require_relative "deep_merge"
 
 class ObjectFormatter
   def initialize
@@ -8,7 +8,7 @@ class ObjectFormatter
   attr_reader :mismatches
 
   def add_mismatch(prefix, attribute, curr_val, other_val)
-    prefix_parts = prefix.split('.').flat_map { |part| part.split('#') }.collect(&:to_sym)
+    prefix_parts = prefix.split(".").flat_map { |part| part.split("#") }.collect(&:to_sym)
     curr = mismatches
 
     prefix_parts.each do |part|

@@ -1,6 +1,6 @@
-require 'rspec'
-require 'spec_helper'
-require 'mismatch_inspectable'
+require "rspec"
+require "spec_helper"
+require "mismatch_inspectable"
 
 class TestClass
   include MismatchInspectable
@@ -24,9 +24,9 @@ RSpec.describe MismatchInspectable do
   let(:format) { :array }
   let(:recursive) { false }
 
-  let(:name) { 'Tyler' }
+  let(:name) { "Tyler" }
   let(:age) { 29 }
-  let(:address) { '123 Cool St' }
+  let(:address) { "123 Cool St" }
 
   before do
     object1.name = name
@@ -38,38 +38,38 @@ RSpec.describe MismatchInspectable do
     object2.address = address
   end
 
-  describe '#inspect_mismatch' do
-    context 'when objects are of different classes' do
+  describe "#inspect_mismatch" do
+    context "when objects are of different classes" do
       let(:object3) { Object.new }
 
-      it 'returns nil' do
+      it "returns nil" do
         expect(object1.inspect_mismatch(object3)).to be_nil
       end
     end
 
-    context 'when objects are of the same class' do
-      context 'with top level attributes that match' do
-        it 'returns an empty array' do
+    context "when objects are of the same class" do
+      context "with top level attributes that match" do
+        it "returns an empty array" do
           expect(object1.inspect_mismatch(object1)).to eq([])
         end
 
-        context 'when format is set to :hash' do
+        context "when format is set to :hash" do
           let(:format) { :hash }
 
-          it 'returns an empty hash' do
-            expect(object1.inspect_mismatch(object1, format: format)).to eq({})
+          it "returns an empty hash" do
+            expect(object1.inspect_mismatch(object1, format:)).to eq({})
           end
         end
 
-        context 'with nested inspectable attributes' do
+        context "with nested inspectable attributes" do
           let(:recursive) { true }
 
-          context 'when objects have nested attributes with the same class' do
+          context "when objects have nested attributes with the same class" do
             let(:nested1) { NestedTestClass.new }
             let(:nested2) { NestedTestClass.new }
 
-            let(:city) { 'ATX' }
-            let(:country) { 'USA' }
+            let(:city) { "ATX" }
+            let(:country) { "USA" }
 
             before do
               nested1.city = city
@@ -82,42 +82,42 @@ RSpec.describe MismatchInspectable do
               object2.nested = nested2
             end
 
-            context 'when nested attributes match' do
-              it 'returns an empty array' do
-                expect(object1.inspect_mismatch(object2, recursive: recursive)).to eq([])
+            context "when nested attributes match" do
+              it "returns an empty array" do
+                expect(object1.inspect_mismatch(object2, recursive:)).to eq([])
               end
 
-              context 'when format is set to :hash' do
+              context "when format is set to :hash" do
                 let(:format) { :hash }
-                it 'returns an empty hash' do
-                  expect(object1.inspect_mismatch(object2, format: format, recursive: recursive)).to eq({})
+                it "returns an empty hash" do
+                  expect(object1.inspect_mismatch(object2, format:, recursive:)).to eq({})
                 end
               end
             end
 
-            context 'when nested attributes have different values' do
-              before { nested2.city = 'Phoenix' }
+            context "when nested attributes have different values" do
+              before { nested2.city = "Phoenix" }
 
-              it 'returns an array of mismatched nested attributes with recursive flag enabled' do
+              it "returns an array of mismatched nested attributes with recursive flag enabled" do
                 expected = [
-                  ['nested.NestedTestClass#city', 'ATX', 'Phoenix']
+                  ["nested.NestedTestClass#city", "ATX", "Phoenix"]
                 ]
-                expect(object1.inspect_mismatch(object2, recursive: recursive)).to eq(expected)
+                expect(object1.inspect_mismatch(object2, recursive:)).to eq(expected)
               end
 
-              context 'when format is set to :hash' do
+              context "when format is set to :hash" do
                 let(:format) { :hash }
-                it 'returns a hash of mismatched nested attributes with recursive flag enabled' do
+                it "returns a hash of mismatched nested attributes with recursive flag enabled" do
                   expected = {
-                    'nested.NestedTestClass#city' => %w[ATX Phoenix]
+                    "nested.NestedTestClass#city" => %w[ATX Phoenix]
                   }
-                  expect(object1.inspect_mismatch(object2, format: format, recursive: recursive)).to eq(expected)
+                  expect(object1.inspect_mismatch(object2, format:, recursive:)).to eq(expected)
                 end
               end
             end
           end
 
-          context 'when nested attributes have different classes' do
+          context "when nested attributes have different classes" do
             let(:nested1) { NestedTestClass.new }
             let(:nested2) { TestClass.new }
 
@@ -126,8 +126,8 @@ RSpec.describe MismatchInspectable do
               object2.nested = nested2
             end
 
-            it 'returns nil for mismatched nested attribute with recursive flag enabled' do
-              expect(object1.inspect_mismatch(object2, recursive: recursive)).to eq([])
+            it "returns nil for mismatched nested attribute with recursive flag enabled" do
+              expect(object1.inspect_mismatch(object2, recursive:)).to eq([])
             end
           end
         end
@@ -136,117 +136,117 @@ RSpec.describe MismatchInspectable do
       context "with top level attributes that don't match" do
         before { object2.age = 30 }
 
-        context 'when format is set to :array (default)' do
-          it 'returns an array of mismatched attributes' do
+        context "when format is set to :array (default)" do
+          it "returns an array of mismatched attributes" do
             expected = [
-              ['TestClass#age', 29, 30]
+              ["TestClass#age", 29, 30]
             ]
             expect(object1.inspect_mismatch(object2)).to eq(expected)
           end
         end
 
-        context 'when format is set to :hash' do
+        context "when format is set to :hash" do
           let(:format) { :hash }
-          it 'returns a hash of mismatched attributes' do
+          it "returns a hash of mismatched attributes" do
             expected = {
-              'TestClass#age' => [29, 30]
+              "TestClass#age" => [29, 30]
             }
-            expect(object1.inspect_mismatch(object2, format: format)).to eq(expected)
+            expect(object1.inspect_mismatch(object2, format:)).to eq(expected)
           end
         end
 
-        context 'when format is set to :object' do
+        context "when format is set to :object" do
           let(:format) { :object }
-          it 'returns an object of mismatched attributes' do
+          it "returns an object of mismatched attributes" do
             expected = {
               TestClass: {
                 age: [29, 30]
               }
             }
-            expect(object1.inspect_mismatch(object2, format: format)).to eq(expected)
+            expect(object1.inspect_mismatch(object2, format:)).to eq(expected)
           end
         end
 
-        context 'with nested inspectable attributes' do
+        context "with nested inspectable attributes" do
           let(:recursive) { true }
-          context 'when objects have nested attributes with the same class' do
+          context "when objects have nested attributes with the same class" do
             let(:nested1) { NestedTestClass.new }
             let(:nested2) { NestedTestClass.new }
 
-            let(:city) { 'ATX' }
-            let(:country) { 'USA' }
+            let(:city) { "ATX" }
+            let(:country) { "USA" }
 
             before do
               nested1.city = city
               nested1.country = country
 
-              nested2.city = 'Phoenix'
+              nested2.city = "Phoenix"
               nested2.country = country
 
               object1.nested = nested1
               object2.nested = nested1
             end
 
-            context 'when nested attributes match' do
-              context 'when format is set to :array (default)' do
-                it 'returns the top-level mismatched attributes' do
+            context "when nested attributes match" do
+              context "when format is set to :array (default)" do
+                it "returns the top-level mismatched attributes" do
                   expected = [
-                    ['TestClass#age', 29, 30]
+                    ["TestClass#age", 29, 30]
                   ]
                   expect(object1.inspect_mismatch(object2)).to eq(expected)
                 end
               end
 
-              context 'when format is set to :hash' do
+              context "when format is set to :hash" do
                 let(:format) { :hash }
-                it 'returns the top-level mismatched attributes' do
+                it "returns the top-level mismatched attributes" do
                   expected = {
-                    'TestClass#age' => [29, 30]
+                    "TestClass#age" => [29, 30]
                   }
-                  expect(object1.inspect_mismatch(object2, format: format)).to eq(expected)
+                  expect(object1.inspect_mismatch(object2, format:)).to eq(expected)
                 end
               end
 
-              context 'when format is set to :object' do
+              context "when format is set to :object" do
                 let(:format) { :object }
-                it 'returns the top-level mismatched attributes' do
+                it "returns the top-level mismatched attributes" do
                   expected = {
                     TestClass: {
                       age: [29, 30]
                     }
                   }
-                  expect(object1.inspect_mismatch(object2, format: format)).to eq(expected)
+                  expect(object1.inspect_mismatch(object2, format:)).to eq(expected)
                 end
               end
             end
 
-            context 'when nested attributes have different values' do
+            context "when nested attributes have different values" do
               before { object2.nested = nested2 }
 
-              context 'when format is set to :array (default)' do
-                it 'returns an array of mismatched nested attributes with recursive flag enabled' do
+              context "when format is set to :array (default)" do
+                it "returns an array of mismatched nested attributes with recursive flag enabled" do
                   expected = [
-                    ['TestClass#age', 29, 30],
-                    ['TestClass#nested.NestedTestClass#city', 'ATX', 'Phoenix']
+                    ["TestClass#age", 29, 30],
+                    ["TestClass#nested.NestedTestClass#city", "ATX", "Phoenix"]
                   ]
                   expect(object1.inspect_mismatch(object2, recursive: true)).to eq(expected)
                 end
               end
 
-              context 'when format is set to :hash' do
+              context "when format is set to :hash" do
                 let(:format) { :hash }
-                it 'returns a hash of mismatched nested attributes with recursive flag enabled' do
+                it "returns a hash of mismatched nested attributes with recursive flag enabled" do
                   expected = {
-                    'TestClass#age' => [29, 30],
-                    'TestClass#nested.NestedTestClass#city' => %w[ATX Phoenix]
+                    "TestClass#age" => [29, 30],
+                    "TestClass#nested.NestedTestClass#city" => %w[ATX Phoenix]
                   }
-                  expect(object1.inspect_mismatch(object2, recursive: recursive, format: format)).to eq(expected)
+                  expect(object1.inspect_mismatch(object2, recursive:, format:)).to eq(expected)
                 end
               end
 
-              context 'when format is set to :object' do
+              context "when format is set to :object" do
                 let(:format) { :object }
-                it 'returns an object of mismatched nested attributes with recursive flag enabled' do
+                it "returns an object of mismatched nested attributes with recursive flag enabled" do
                   expected = {
                     TestClass: {
                       age: [29, 30],
@@ -257,13 +257,13 @@ RSpec.describe MismatchInspectable do
                       }
                     }
                   }
-                  expect(object1.inspect_mismatch(object2, recursive: recursive, format: format)).to eq(expected)
+                  expect(object1.inspect_mismatch(object2, recursive:, format:)).to eq(expected)
                 end
               end
             end
           end
 
-          context 'when nested attributes have different classes' do
+          context "when nested attributes have different classes" do
             let(:nested1) { NestedTestClass.new }
             let(:nested2) { TestClass.new }
 
@@ -272,31 +272,31 @@ RSpec.describe MismatchInspectable do
               object2.nested = nested2
             end
 
-            context 'when format is set to :array (default)' do
-              it 'returns nil for mismatched nested attribute with recursive flag enabled' do
-                expect(object1.inspect_mismatch(object2, recursive: recursive)).to eq(
+            context "when format is set to :array (default)" do
+              it "returns nil for mismatched nested attribute with recursive flag enabled" do
+                expect(object1.inspect_mismatch(object2, recursive:)).to eq(
                   [
-                    ['TestClass#age', 29, 30]
+                    ["TestClass#age", 29, 30]
                   ]
                 )
               end
             end
 
-            context 'when format is set to :hash' do
+            context "when format is set to :hash" do
               let(:format) { :hash }
-              it 'returns nil for mismatched nested attribute with recursive flag enabled' do
-                expect(object1.inspect_mismatch(object2, recursive: recursive, format: format)).to eq(
+              it "returns nil for mismatched nested attribute with recursive flag enabled" do
+                expect(object1.inspect_mismatch(object2, recursive:, format:)).to eq(
                   {
-                    'TestClass#age' => [29, 30]
+                    "TestClass#age" => [29, 30]
                   }
                 )
               end
             end
 
-            context 'when format is set to :object' do
+            context "when format is set to :object" do
               let(:format) { :object }
-              it 'returns nil for mismatched nested attribute with recursive flag enabled' do
-                expect(object1.inspect_mismatch(object2, recursive: recursive, format: format)).to eq(
+              it "returns nil for mismatched nested attribute with recursive flag enabled" do
+                expect(object1.inspect_mismatch(object2, recursive:, format:)).to eq(
                   {
                     TestClass: {
                       age: [29, 30]
@@ -307,7 +307,8 @@ RSpec.describe MismatchInspectable do
             end
           end
 
-          context 'with multiple levels of nested inspectable attributes' do
+          context "with multiple levels of nested inspectable attributes" do
+            # rubocop:disable Lint/ConstantDefinitionInBlock
             class Thing
               include MismatchInspectable
 
@@ -321,24 +322,25 @@ RSpec.describe MismatchInspectable do
               end
 
               def inspect
-                '<Thing>'
+                "<Thing>"
               end
 
               attr_accessor :color, :shape, :is_cool, :nested_thing
             end
+            # rubocop:enable Lint/ConstantDefinitionInBlock
 
             let(:thing1) do
               Thing.new(
-                color: 'blue',
-                shape: 'square',
+                color: "blue",
+                shape: "square",
                 is_cool: false,
                 nested_thing: Thing.new(
-                  color: 'blue',
-                  shape: 'oval',
+                  color: "blue",
+                  shape: "oval",
                   is_cool: true,
                   nested_thing: Thing.new(
-                    color: 'silver',
-                    shape: 'oval',
+                    color: "silver",
+                    shape: "oval",
                     is_cool: true
                   )
                 )
@@ -347,23 +349,23 @@ RSpec.describe MismatchInspectable do
 
             let(:thing2) do
               Thing.new(
-                color: 'green',
-                shape: 'oval',
+                color: "green",
+                shape: "oval",
                 is_cool: false,
                 nested_thing: Thing.new(
-                  color: 'red',
-                  shape: 'another shape',
+                  color: "red",
+                  shape: "another shape",
                   is_cool: true,
                   nested_thing: Thing.new(
-                    color: 'blue',
-                    shape: 'oval',
+                    color: "blue",
+                    shape: "oval",
                     is_cool: false
                   )
                 )
               )
             end
-            context 'with recursive flag disabled' do
-              it 'returns the mismatched top-level attributes' do
+            context "with recursive flag disabled" do
+              it "returns the mismatched top-level attributes" do
                 expect(thing1.inspect_mismatch(thing2, format: :object)).to eq(
                   {
                     Thing: {
@@ -376,10 +378,10 @@ RSpec.describe MismatchInspectable do
               end
             end
 
-            context 'with recursive flag enabled' do
+            context "with recursive flag enabled" do
               let(:recursive) { true }
-              it 'returns the mismatched attributes with the appropriate nesting' do
-                expect(thing1.inspect_mismatch(thing2, recursive: recursive, format: :object)).to eq(
+              it "returns the mismatched attributes with the appropriate nesting" do
+                expect(thing1.inspect_mismatch(thing2, recursive:, format: :object)).to eq(
                   {
                     Thing: {
                       color: %w[blue green],
@@ -389,7 +391,7 @@ RSpec.describe MismatchInspectable do
                       nested_thing: {
                         Thing: {
                           color: %w[blue red],
-                          shape: ['oval', 'another shape'],
+                          shape: ["oval", "another shape"],
                           nested_thing: {
                             Thing: {
                               color: %w[silver blue],
