@@ -1,8 +1,11 @@
+require_relative "formatter"
+
 module MismatchInspectable
-  class ArrayFormatter
+  class ArrayFormatter < Formatter
     attr_reader :mismatches
 
     def initialize
+      super
       @mismatches = []
     end
 
@@ -10,7 +13,7 @@ module MismatchInspectable
       @mismatches << [prefix + attribute.to_s, curr_val, other_val]
     end
 
-    def merge_mismatches(nested_mismatches)
+    def process_mismatches(nested_mismatches)
       @mismatches.concat(nested_mismatches)
     end
   end

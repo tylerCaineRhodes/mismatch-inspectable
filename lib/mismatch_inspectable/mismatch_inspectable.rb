@@ -69,7 +69,7 @@ module MismatchInspectable
       other_val,
       **options.to_h
     )
-    merge_mismatches(nested_mismatches:) unless no_nested_mismatches?(nested_mismatches)
+    merge_mismatches(nested_mismatches:)
   end
 
   def no_nested_mismatches?(mismatches)

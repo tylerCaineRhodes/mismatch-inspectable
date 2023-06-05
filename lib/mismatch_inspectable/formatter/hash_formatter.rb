@@ -1,8 +1,11 @@
+require_relative "formatter"
+
 module MismatchInspectable
-  class HashFormatter
+  class HashFormatter < Formatter
     attr_reader :mismatches
 
     def initialize
+      super
       @mismatches = Hash.new { |hash, key| hash[key] = {} }
     end
 
@@ -10,7 +13,7 @@ module MismatchInspectable
       @mismatches[prefix + attribute.to_s] = [curr_val, other_val]
     end
 
-    def merge_mismatches(nested_mismatches)
+    def process_mismatches(nested_mismatches)
       nested_mismatches.each { |k, v| mismatches[k] = v }
     end
   end

@@ -1,4 +1,4 @@
-require_relative "format_builder"
+require_relative "formatter/format_builder"
 
 module MismatchInspectable
   class InspectionOptions

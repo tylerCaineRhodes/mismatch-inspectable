@@ -1,7 +1,9 @@
 require_relative "deep_merge"
+require_relative "formatter"
 
-class ObjectFormatter
+class ObjectFormatter < MismatchInspectable::Formatter
   def initialize
+    super
     @mismatches = {}.extend(DeepMerge)
   end
 
@@ -19,7 +21,7 @@ class ObjectFormatter
     curr[attribute] = [curr_val, other_val]
   end
 
-  def merge_mismatches(nested_mismatches)
+  def process_mismatches(nested_mismatches)
     mismatches.deep_merge!(nested_mismatches)
   end
 end
