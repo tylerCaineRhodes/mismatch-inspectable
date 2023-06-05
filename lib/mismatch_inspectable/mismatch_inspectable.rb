@@ -1,8 +1,8 @@
-require_relative "hash_formatter"
-require_relative "array_formatter"
-require_relative "object_formatter"
+require_relative "inspection_options"
 
 module MismatchInspectable
+  attr_reader :options
+
   def self.included(target_class)
     target_class.extend ClassMethods
   end
@@ -21,43 +21,39 @@ module MismatchInspectable
     end
   end
 
-  def inspect_mismatch(other, recursive: false, include_class: true, prefix: "", format: :array)
+  def inspect_mismatch(other, **options)
+    @options ||= InspectionOptions.new(**options)
+    find_mismatches(other)
+  end
+
+  protected
+
+  def find_mismatches(other)
     return if self.class != other.class
 
-    formatter = select_formatter(format)
-
-    process_attributes(formatter, other, recursive, include_class, prefix, format)
-    formatter.mismatches
+    process_attributes!(other)
+    mismatches
   end
+
+  private
 
   def compare_methods
     self.class.compare_methods
   end
 
-  private
-
-  def select_formatter(format)
-    case format
-    when :hash then HashFormatter.new
-    when :array then ArrayFormatter.new
-    when :object then ObjectFormatter.new
-    else raise ArgumentError, "Invalid format: #{format}"
-    end
-  end
-
-  # rubocop:disable Metrics/ParameterLists
-  def process_attributes(formatter, other, recursive, include_class, prefix, format)
+  def process_attributes!(other)
     raise MissingCompareMethodsError if compare_methods.nil?
 
     compare_methods.each do |attribute|
       curr_val = __send__(attribute)
       other_val = other.__send__(attribute)
 
-      if recursive && both_are_inspectable?(curr_val, other_val)
-        process_recursive(formatter, curr_val, other_val, include_class, prefix, attribute, format)
+      if options.recursive && both_are_inspectable?(curr_val, other_val)
+        process_recursive(curr_val, other_val, attribute)
       elsif curr_val != other_val
-        prefix = update_prefix(include_class, prefix)
-        formatter.add_mismatch(prefix, attribute, curr_val, other_val)
+
+        update_prefix(self)
+        formatter.add_mismatch(options.prefix, attribute, curr_val, other_val)
       end
     end
   end
@@ -66,30 +62,33 @@ module MismatchInspectable
     curr_val.respond_to?(:inspect_mismatch) && other_val.respond_to?(:inspect_mismatch)
   end
 
-  def process_recursive(formatter, curr_val, other_val, include_class, prefix, attribute, format)
+  def process_recursive(curr_val, other_val, attribute)
+    options.prefix = "#{options.prefix}#{attribute}."
+    options.recursive = true
     nested_mismatches = curr_val.inspect_mismatch(
       other_val,
-      recursive: true,
-      include_class:,
-      prefix: "#{prefix}#{attribute}.",
-      format:
+      **options.to_h
     )
-
-    formatter.merge_mismatches(nested_mismatches) unless no_nested_mismatches?(nested_mismatches)
-  end
-  # rubocop:enable Metrics/ParameterLists
-
-  def update_prefix(include_class, prefix)
-    comparable_prefix = get_comparable_prefix(prefix)
-    include_class && comparable_prefix != "#{self.class}#" ? "#{prefix}#{self.class}#" : prefix
+    merge_mismatches(nested_mismatches) unless no_nested_mismatches?(nested_mismatches)
   end
 
   def no_nested_mismatches?(mismatches)
     mismatches.nil? || mismatches.empty?
   end
 
-  def get_comparable_prefix(prefix)
-    prefixes = prefix.split(".")
-    prefixes.length >= 2 ? prefixes[-1] : prefix
+  def update_prefix(target_class)
+    options.update_prefix(target_class)
+  end
+
+  def formatter
+    options.formatter
+  end
+
+  def mismatches
+    formatter.mismatches
+  end
+
+  def merge_mismatches(nested_mismatches)
+    formatter.merge_mismatches(nested_mismatches)
   end
 end
