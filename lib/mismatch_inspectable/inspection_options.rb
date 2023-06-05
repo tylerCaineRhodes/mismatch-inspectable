@@ -1,6 +1,4 @@
-require_relative "hash_formatter"
-require_relative "array_formatter"
-require_relative "object_formatter"
+require_relative "format_builder"
 
 module MismatchInspectable
   class InspectionOptions
@@ -14,7 +12,7 @@ module MismatchInspectable
     end
 
     def formatter
-      @formatter ||= select_formatter(@format)
+      @formatter ||= FormatBuilder.new(format).formatter
     end
 
     def to_h
@@ -35,17 +33,6 @@ module MismatchInspectable
     def comparable_prefix
       prefixes = prefix.split(".")
       prefixes.length >= 2 ? prefixes[-1] : prefix
-    end
-
-    private
-
-    def select_formatter(format)
-      case format
-      when :hash then HashFormatter.new
-      when :array then ArrayFormatter.new
-      when :object then ObjectFormatter.new
-      else raise ArgumentError, "Invalid format: #{format}"
-      end
     end
   end
 end
