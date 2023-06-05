@@ -48,35 +48,35 @@ module MismatchInspectable
       curr_val = __send__(attribute)
       other_val = other.__send__(attribute)
 
-      if options.recursive && both_are_inspectable?(curr_val, other_val)
-        process_recursive(curr_val, other_val, attribute)
+      if options.recursive && both_are_inspectable?(curr_val:, other_val:)
+        process_recursive(curr_val:, other_val:, attribute:)
       elsif curr_val != other_val
 
-        update_prefix(self)
+        update_prefix(target_class: self)
         formatter.add_mismatch(options.prefix, attribute, curr_val, other_val)
       end
     end
   end
 
-  def both_are_inspectable?(curr_val, other_val)
+  def both_are_inspectable?(curr_val:, other_val:)
     curr_val.respond_to?(:inspect_mismatch) && other_val.respond_to?(:inspect_mismatch)
   end
 
-  def process_recursive(curr_val, other_val, attribute)
+  def process_recursive(curr_val:, other_val:, attribute:)
     options.prefix = "#{options.prefix}#{attribute}."
     options.recursive = true
     nested_mismatches = curr_val.inspect_mismatch(
       other_val,
       **options.to_h
     )
-    merge_mismatches(nested_mismatches) unless no_nested_mismatches?(nested_mismatches)
+    merge_mismatches(nested_mismatches:) unless no_nested_mismatches?(nested_mismatches)
   end
 
   def no_nested_mismatches?(mismatches)
     mismatches.nil? || mismatches.empty?
   end
 
-  def update_prefix(target_class)
+  def update_prefix(target_class:)
     options.update_prefix(target_class)
   end
 
@@ -88,7 +88,7 @@ module MismatchInspectable
     formatter.mismatches
   end
 
-  def merge_mismatches(nested_mismatches)
+  def merge_mismatches(nested_mismatches:)
     formatter.merge_mismatches(nested_mismatches)
   end
 end
