@@ -49,7 +49,7 @@ module MismatchInspectable
       other_val = other.__send__(attribute)
 
       if options.recursive && both_are_inspectable?(curr_val:, other_val:)
-        process_recursive(curr_val:, other_val:, attribute:)
+        process_recursive!(curr_val:, other_val:, attribute:)
       elsif curr_val != other_val
 
         update_prefix(target_class: self)
@@ -62,7 +62,7 @@ module MismatchInspectable
     curr_val.respond_to?(:inspect_mismatch) && other_val.respond_to?(:inspect_mismatch)
   end
 
-  def process_recursive(curr_val:, other_val:, attribute:)
+  def process_recursive!(curr_val:, other_val:, attribute:)
     options.prefix = "#{options.prefix}#{attribute}."
     options.recursive = true
     nested_mismatches = curr_val.inspect_mismatch(
