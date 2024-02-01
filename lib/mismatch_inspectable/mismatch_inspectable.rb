@@ -21,17 +21,17 @@ module MismatchInspectable
     end
   end
 
-  def inspect_mismatch(other, **options)
+  def inspect_mismatch(other_klass, **options)
     @options ||= InspectionOptions.new(**options)
-    find_mismatches(other)
+    find_mismatches(other_klass:)
   end
 
   protected
 
-  def find_mismatches(other)
-    return if self.class != other.class
+  def find_mismatches(other_klass:)
+    return if self.class != other_klass.class
 
-    process_attributes!(other)
+    process_attributes!(other_klass:)
     mismatches
   end
 
@@ -41,12 +41,12 @@ module MismatchInspectable
     self.class.compare_methods
   end
 
-  def process_attributes!(other)
+  def process_attributes!(other_klass:)
     raise MissingCompareMethodsError if compare_methods.nil?
 
     compare_methods.each do |attribute|
       curr_val = __send__(attribute)
-      other_val = other.__send__(attribute)
+      other_val = other_klass.__send__(attribute)
 
       if options.recursive && both_are_inspectable?(curr_val:, other_val:)
         process_recursive!(curr_val:, other_val:, attribute:)
