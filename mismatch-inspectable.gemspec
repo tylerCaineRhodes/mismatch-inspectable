@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   objects."
   s.homepage = "https://github.com/tyleCaineRhodes/mismatch-inspectable"
   s.licenses = ["MIT"]
-  s.required_ruby_version = "3.2.1"
+  s.required_ruby_version = ">= 3.2.1"
 
   s.files = Dir["{lib,spec}/**/*", "README.md", "LICENSE.md"]
   s.require_paths = ["lib"]
