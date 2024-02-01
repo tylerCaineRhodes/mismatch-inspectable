@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.description   = "A library that includes a module that can print mismatched
   values for any class that includes it. Supports recursive inspection of nested
   objects."
-  s.homepage = "https://github.com/tyleCaineRhodes/mismatch-inspectable"
+  s.homepage = "https://github.com/tylerCaineRhodes/mismatch-inspectable"
   s.licenses = ["MIT"]
   s.required_ruby_version = ">= 3.2.1"
 
