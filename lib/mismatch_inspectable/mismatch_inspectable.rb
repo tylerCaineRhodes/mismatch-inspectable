@@ -1,6 +1,43 @@
 require_relative "inspection_options"
 
 module MismatchInspectable
+  def self.diff(obj1, obj2, path = "")
+    differences = []
+
+    if obj1.class != obj2.class
+      return ["Different classes at '#{path}': #{obj1.class} vs #{obj2.class}"]
+    end
+
+    case obj1
+    when Hash
+      all_keys = obj1.keys | obj2.keys
+      all_keys.each do |key|
+        new_path = path.empty? ? key.to_s : "#{path}.#{key}"
+        unless obj1.key?(key) && obj2.key?(key)
+          differences << "Key present only in one object: '#{new_path}'"
+          next
+        end
+        differences.concat(diff(obj1[key], obj2[key], new_path))
+      end
+    when Array
+      max_length = [obj1.length, obj2.length].max
+      (0...max_length).each do |index|
+        new_path = "#{path}[#{index}]"
+        if index >= obj1.length || index >= obj2.length
+          differences << "Array length mismatch at '#{new_path}'"
+        else
+          differences.concat(diff(obj1[index], obj2[index], new_path))
+        end
+      end
+    else
+      unless obj1 == obj2
+        differences << "Different values at '#{path}': #{obj1.inspect} vs #{obj2.inspect}"
+      end
+    end
+
+    differences
+  end
+
   attr_reader :options
 
   def self.included(target_class)
@@ -23,6 +60,7 @@ module MismatchInspectable
 
   def inspect_mismatch(other_klass, **options)
     @options ||= InspectionOptions.new(**options)
+
     find_mismatches(other_klass:)
   end
 
