@@ -19,26 +19,26 @@ class NestedTestClass
 end
 
 RSpec.describe MismatchInspectable do
-  let(:object1) { TestClass.new }
-  let(:object2) { TestClass.new }
-  let(:format) { :array }
-  let(:recursive) { false }
-
-  let(:name) { "Tyler" }
-  let(:age) { 29 }
-  let(:address) { "123 Cool St" }
-
-  before do
-    object1.name = name
-    object1.age = age
-    object1.address = address
-
-    object2.name = name
-    object2.age = age
-    object2.address = address
-  end
-
   describe "#inspect_mismatch" do
+    let(:object1) { TestClass.new }
+    let(:object2) { TestClass.new }
+    let(:format) { :array }
+    let(:recursive) { false }
+
+    let(:name) { "Tyler" }
+    let(:age) { 29 }
+    let(:address) { "123 Cool St" }
+
+    before do
+      object1.name = name
+      object1.age = age
+      object1.address = address
+
+      object2.name = name
+      object2.age = age
+      object2.address = address
+    end
+
     context "when objects are of different classes" do
       let(:object3) { Object.new }
 
@@ -405,6 +405,58 @@ RSpec.describe MismatchInspectable do
                 )
               end
             end
+          end
+        end
+      end
+    end
+  end
+
+  describe ".diff" do
+    context "with primitive objects" do
+      context "when the objects are not equal" do
+        let(:object1) { 1 }
+        let(:object2) { 2 }
+
+        specify do
+          expect(MismatchInspectable.diff(object1, object2)).to eq([["", 1, 2]])
+        end
+      end
+      context "when the objects are equal" do
+        let(:object1) { 1 }
+        let(:object2) { object1 }
+
+        specify do
+          expect(MismatchInspectable.diff(object1, object2)).to eq([])
+        end
+      end
+
+      context "when the classes do not match" do
+        let(:object1) { 1 }
+        let(:object2) { "1" }
+
+        specify do
+          expect(MismatchInspectable.diff(object1, object2)).to eq([["", 1, "1"]])
+        end
+      end
+    end
+
+    context "with enemerable objects" do
+      context "with arrays" do
+        context "with diff values" do
+          let(:object1) { [1, 2, 3] }
+          let(:object2) { [1, 2, 4] }
+
+          specify do
+            expect(MismatchInspectable.diff(object1, object2)).to eq([["[2]", 3, 4]])
+          end
+        end
+
+        context 'with diff lengths' do
+          let(:object1) { [1, 2, 3] }
+          let(:object2) { [1, 2] }
+
+          specify do
+            expect(MismatchInspectable.diff(object1, object2)).to eq([["#length", 3, 2]])
           end
         end
       end

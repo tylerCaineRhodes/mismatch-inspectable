@@ -4,10 +4,6 @@ module MismatchInspectable
   def self.diff(obj1, obj2, path = "")
     differences = []
 
-    if obj1.class != obj2.class
-      return ["Different classes at '#{path}': #{obj1.class} vs #{obj2.class}"]
-    end
-
     case obj1
     when Hash
       all_keys = obj1.keys | obj2.keys
@@ -24,14 +20,14 @@ module MismatchInspectable
       (0...max_length).each do |index|
         new_path = "#{path}[#{index}]"
         if index >= obj1.length || index >= obj2.length
-          differences << "Array length mismatch at '#{new_path}'"
+          differences << ["#length", obj1.length, obj2.length]
         else
           differences.concat(diff(obj1[index], obj2[index], new_path))
         end
       end
     else
       unless obj1 == obj2
-        differences << "Different values at '#{path}': #{obj1.inspect} vs #{obj2.inspect}"
+        differences << [path, obj1, obj2]
       end
     end
 
