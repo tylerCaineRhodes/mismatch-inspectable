@@ -22,7 +22,7 @@ module MismatchInspectable
   end
 
   def inspect_mismatch(other_klass, **options)
-    @options ||= InspectionOptions.new(**options)
+    @options = InspectionOptions.new(**options)
     find_mismatches(other_klass:)
   end
 
